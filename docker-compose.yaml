@@ -1,0 +1,42 @@
+version: "3"
+
+networks:
+  observability-stack:
+    driver: bridge
+
+volumes:
+  observability-stack: {}
+
+services:
+  node_exporter:    # node(host) exporter
+    image: prom/node-exporter:latest
+    expose:
+      - 9100
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - observability-stack
+
+  container_exporter:
+    image: google/cadvisor:latest        
+    expose:
+      - 8080
+    container_name: container-exporter
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw 
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - observability-stack
+
