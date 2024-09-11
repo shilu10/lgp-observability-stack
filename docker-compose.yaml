@@ -5,7 +5,9 @@ networks:
     driver: bridge
 
 volumes:
-  observability-stack: {}
+  prometheus-data: {}
+  grafana-data: {}
+  loki-data: {}
 
 services:
   node_exporter:
@@ -27,7 +29,7 @@ services:
       - observability-stack
 
   container_exporter:
-    image: gcr.io/cadvisor/cadvisor:latest    
+    image: gcr.io/cadvisor/cadvisor:latest
     expose:
       - 8080
     container_name: container-exporter
@@ -35,11 +37,28 @@ services:
     privileged: true
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:rw 
+      - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - observability-stack
+
+  prometheus:
+    image: bitnami/prometheus:latest
+    ports:
+      - '9090:9090'
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus/prometheus.yaml:/opt/bitnami/prometheus/conf/prometheus.yaml:ro
+      - prometheus-data:/opt/bitnami/prometheus/data
+    command:
+      - '--config.file=/opt/bitnami/prometheus/conf/prometheus.yaml'
+    networks:
+      - observability-stack
+    depends_on:
+      - container_exporter
+      - node_exporter
 
   loki:
     image: grafana/loki:latest
@@ -49,6 +68,7 @@ services:
       - '3100:3100'
     volumes:
       - ./config/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
     command:
       - '-config.file=/etc/loki/loki-config.yaml'
     networks:
@@ -66,4 +86,20 @@ services:
       - '-config.file=/etc/promtail/promtail-config.yaml'
     networks:
       - observability-stack
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - observability-stack
+    depends_on:
+      - prometheus
+      - loki
 
