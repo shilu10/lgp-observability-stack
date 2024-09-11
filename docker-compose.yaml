@@ -8,7 +8,7 @@ volumes:
   observability-stack: {}
 
 services:
-  node_exporter:    # node(host) exporter
+  node_exporter:
     image: prom/node-exporter:latest
     expose:
       - 9100
@@ -27,16 +27,43 @@ services:
       - observability-stack
 
   container_exporter:
-    image: google/cadvisor:latest        
+    image: gcr.io/cadvisor/cadvisor:latest    
     expose:
       - 8080
     container_name: container-exporter
     restart: unless-stopped
+    privileged: true
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw 
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - observability-stack
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    restart: unless-stopped
+    ports:
+      - '3100:3100'
+    volumes:
+      - ./config/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+    command:
+      - '-config.file=/etc/loki/loki-config.yaml'
+    networks:
+      - observability-stack
+
+  promtail_agent:
+    image: grafana/promtail:latest
+    container_name: promtail-agent
+    restart: unless-stopped
+    volumes:
+      - ./config/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro  # Optional, if collecting container logs
+    command:
+      - '-config.file=/etc/promtail/promtail-config.yaml'
     networks:
       - observability-stack
 
