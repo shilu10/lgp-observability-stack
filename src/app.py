@@ -84,7 +84,7 @@ async def error_test(response: Response):
     raise ValueError("A value error occurred")
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(EXPOSE_PORT))
+#if __name__ == "__main__":
+#   uvicorn.run(app, host="0.0.0.0", port=int(EXPOSE_PORT))
 
 
