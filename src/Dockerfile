@@ -8,6 +8,9 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8080 
 
-ENTRYPOINT uvicorn myapp:app 
-CMD ["--host 0.0.0.0", "--port 8000", "--workers 3", "--log-level info"]
+# Entry point for the container
+ENTRYPOINT ["uvicorn"]
+
+# Default command to run Uvicorn
+CMD ["app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--log-level", "info"]
 
