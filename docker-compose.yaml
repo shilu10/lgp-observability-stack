@@ -44,16 +44,16 @@ services:
       - observability-stack
 
   prometheus:
-    image: bitnami/prometheus:latest
+    image: prom/prometheus:latest
     ports:
       - '9090:9090'
     container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./config/prometheus/prometheus.yaml:/opt/bitnami/prometheus/conf/prometheus.yaml:ro
+      - ./config/prometheus/prometheus-config.yaml:/opt/bitnami/prometheus/conf/prometheus-config.yaml:ro
       - prometheus-data:/opt/bitnami/prometheus/data
     command:
-      - '--config.file=/opt/bitnami/prometheus/conf/prometheus.yaml'
+      - '--config.file=/opt/bitnami/prometheus/conf/prometheus-config.yaml'
     networks:
       - observability-stack
     depends_on:
@@ -102,4 +102,5 @@ services:
     depends_on:
       - prometheus
       - loki
+
 
