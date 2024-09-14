@@ -1,0 +1,22 @@
+server:
+  http_listen_port: 9080  # Promtail server listening port
+
+positions:
+  filename: /tmp/positions.yaml  # File to store the current position of logs being read
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push  # Loki server URL to which logs will be pushed
+
+scrape_configs:
+  - job_name: 'docker-logs'  # Job name for the Docker logs collection
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock  # Docker socket path to communicate with Docker daemon
+            
+    relabel_configs:
+      - source_labels: [__meta_docker_container_name]
+        target_label: container
+      - source_labels: [__meta_docker_image]
+        target_label: image
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: service
+
