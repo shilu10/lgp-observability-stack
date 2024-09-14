@@ -10,7 +10,7 @@ from fastapi import FastAPI, Response
 from utils import PrometheusMiddleware, metrics  # Import the metrics utilities
 
 APP_NAME = os.environ.get("APP_NAME", "app")
-EXPOSE_PORT = os.environ.get("EXPOSE_PORT", 8000)
+#EXPOSE_PORT = os.environ.get("EXPOSE_PORT", 8000)
 
 app = FastAPI()
 
@@ -85,6 +85,7 @@ async def error_test(response: Response):
 
 
 #if __name__ == "__main__":
-#   uvicorn.run(app, host="0.0.0.0", port=int(EXPOSE_PORT))
+ #   uvicorn.run(app, host="0.0.0.0", port=int(EXPOSE_PORT))
+
 
 
