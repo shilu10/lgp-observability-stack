@@ -102,5 +102,16 @@ services:
     depends_on:
       - prometheus
       - loki
+  
+  app_a:
+    build: 
+      context: ./src
+      dockerfile: Dockerfile 
+    container_name: app-a 
+    restart: unless-stopped
+    networks:
+      - observability-stack 
+    ports:
+      - "8080:8080"
 
 
